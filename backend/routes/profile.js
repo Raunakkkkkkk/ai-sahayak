@@ -1,9 +1,11 @@
 import express from "express";
+import crypto from "crypto";
 import { askClaude } from "../services/claude.js";
 
 const router = express.Router();
 
-// POST /api/profile/generate
+const profileStore = new Map();
+
 router.post("/generate", async (req, res) => {
   try {
     const { rawDescription, language } = req.body;
@@ -37,11 +39,22 @@ ${rawDescription}
     const cleaned = raw.replace(/```json|```/g, "").trim();
     const profile = JSON.parse(cleaned);
 
-    res.json({ profile });
+    const id = crypto.randomUUID();
+    profileStore.set(id, profile);
+
+    res.json({ profile, id });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to generate profile" });
   }
+});
+
+router.get("/:id", (req, res) => {
+  const profile = profileStore.get(req.params.id);
+  if (!profile) {
+    return res.status(404).json({ error: "Profile not found" });
+  }
+  res.json({ profile });
 });
 
 export default router;

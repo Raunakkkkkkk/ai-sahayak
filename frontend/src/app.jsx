@@ -2,17 +2,22 @@ import { useState } from "react";
 import BusinessForm from "./components/BusinessForm.jsx";
 import ProfileCard from "./components/ProfileCard.jsx";
 import VisibilityReport from "./components/VisibilityReport.jsx";
+import ShareQR from "./components/ShareQR.jsx";
 import Reveal from "./components/Reveal.jsx";
 import StepIndicator from "./components/StepIndicator.jsx";
 import useTilt from "./hooks/useTilt.js";
+import useScrollProgress from "./hooks/useScrollProgress.js";
+import Background3D from "./components/Background3D.jsx";
 
 export default function App() {
   const [profile, setProfile] = useState(null);
+  const [profileId, setProfileId] = useState(null);
   const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(false);
   const [testing, setTesting] = useState(false);
   const [error, setError] = useState("");
   const heroTiltRef = useTilt(2.5);
+  const scrollY = useScrollProgress();
 
   const currentStep = report ? 3 : profile ? 2 : 1;
 
@@ -20,6 +25,7 @@ export default function App() {
     setLoading(true);
     setError("");
     setProfile(null);
+    setProfileId(null);
     setReport(null);
     try {
       const res = await fetch("/api/profile/generate", {
@@ -30,6 +36,7 @@ export default function App() {
       if (!res.ok) throw new Error("Server error");
       const data = await res.json();
       setProfile(data.profile);
+      setProfileId(data.id);
     } catch (err) {
       setError("Couldn't generate your profile. Please try again.");
     } finally {
@@ -58,10 +65,11 @@ export default function App() {
 
   return (
     <div className="bg-scene">
-      <div className="blob blob-1" />
-      <div className="blob blob-2" />
-      <div className="blob blob-3" />
-      <div className="grain" />
+      <div className="blob blob-1" style={{ transform: `translateY(${scrollY * 0.3}px)` }} />
+        <div className="blob blob-2" style={{ transform: `translateY(${scrollY * -0.2}px)` }} />
+        <div className="blob blob-3" style={{ transform: `translateY(${scrollY * 0.15}px)` }} />
+        <Background3D scrollY={scrollY} />
+        <div className="grain" />
 
       <div className="app">
         <header className="site-header">
@@ -74,17 +82,42 @@ export default function App() {
           </div>
           <StepIndicator current={currentStep} />
         </header>
-
-        <section className="hero">
-          <span className="hero-eyebrow">● built for small shops, artisans &amp; farmers</span>
-          <h1>Your shop deserves to show up when someone asks <em>AI</em> for the best nearby.</h1>
-          <p className="lede">
+          <section
+          className="hero"
+          style={{ perspective: "1200px" }}
+        >
+          <span
+            className="hero-eyebrow"
+            style={{ transform: `translateY(${scrollY * 0.15}px)`, opacity: Math.max(1 - scrollY / 300, 0) }}
+          >
+            ● built for small shops, artisans &amp; farmers
+          </span>
+          <h1
+            style={{
+              transform: `translateY(${scrollY * 0.25}px) rotateX(${Math.min(scrollY * 0.03, 8)}deg)`,
+              opacity: Math.max(1 - scrollY / 400, 0),
+              transformStyle: "preserve-3d",
+            }}
+          >
+            Your shop deserves to show up when someone asks <em>AI</em> for the best nearby.
+          </h1>
+          <p
+            className="lede"
+            style={{ transform: `translateY(${scrollY * 0.18}px)`, opacity: Math.max(1 - scrollY / 350, 0) }}
+          >
             Big brands already optimise for ChatGPT and Gemini. Describe your business in your own
             words — even by voice — and get an AI-readable profile in seconds, plus a real test of
             whether AI agents currently recommend you.
           </p>
 
-          <div ref={heroTiltRef} className="chat-demo tilt-card">
+          <div
+            ref={heroTiltRef}
+            className="chat-demo tilt-card"
+            style={{
+              transform: `translateY(${scrollY * -0.08}px) translateZ(${Math.min(scrollY * 0.4, 60)}px) scale(${Math.min(1 + scrollY * 0.0004, 1.06)})`,
+              transformStyle: "preserve-3d",
+            }}
+          >
             <div className="chat-card before" data-label="Before">
               <p className="chat-q">"best handmade jute bags near Ghaziabad"</p>
               <p className="chat-a miss">AI mentions 2 large online retailers. Your shop isn't found — no structured info exists about it online.</p>
@@ -95,6 +128,7 @@ export default function App() {
             </div>
           </div>
         </section>
+        
 
         <Reveal>
           <div className="section-label">Step 1 — describe your business</div>
@@ -108,6 +142,11 @@ export default function App() {
             <Reveal delay={50}>
               <div className="section-label" style={{ marginTop: 36 }}>Step 2 — your AI-readable profile</div>
               <ProfileCard profile={profile} />
+              {profileId && (
+                <div style={{ marginTop: 20 }}>
+                  <ShareQR url={`${window.location.origin}/shop/${profileId}`} />
+                </div>
+              )}
             </Reveal>
 
             <Reveal delay={100}>

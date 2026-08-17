@@ -646,3 +646,91 @@ footer.site-footer {
   * { animation: none !important; transition: none !important; }
   .blob, .floaty, .reveal { opacity: 1 !important; transform: none !important; }
 }
+.qr-card { margin-top: 20px; }
+.qr-layout {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.qr-canvas {
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+.qr-info { flex: 1; min-width: 200px; }
+.qr-title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  margin: 0 0 8px;
+}
+.qr-desc {
+  font-size: 13.5px;
+  color: var(--paper-dim);
+  line-height: 1.5;
+  margin: 0 0 10px;
+}
+.qr-link {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--marigold);
+  word-break: break-all;
+  background: var(--ink-soft);
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  margin: 0 0 14px;
+}
+.qr-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.hero h1, .hero p.lede, .hero .hero-eyebrow, .chat-demo {
+  transition: transform 0.05s linear, opacity 0.05s linear;
+  will-change: transform, opacity;
+}
+
+.hero { min-height: 60vh; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hero h1, .hero p.lede, .hero .hero-eyebrow, .chat-demo, .blob {
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}
+.bg3d {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  perspective: 800px;
+  perspective-origin: 50% 20%;
+}
+
+.bg3d-floor {
+  position: absolute;
+  top: 40%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background-image:
+    linear-gradient(#f2a93b18 1px, transparent 1px),
+    linear-gradient(90deg, #f2a93b18 1px, transparent 1px);
+  background-size: 60px 60px;
+  transform-style: preserve-3d;
+  will-change: transform;
+  mask-image: radial-gradient(ellipse 60% 50% at 50% 0%, black 30%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 60% 50% at 50% 0%, black 30%, transparent 75%);
+}
+
+.bg3d-shape {
+  position: absolute;
+  will-change: transform;
+  filter: drop-shadow(0 0 12px #f2a93b33);
+  transition: transform 0.05s linear;
+  user-select: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bg3d-floor, .bg3d-shape { transform: none !important; }
+}
+
+@media (max-width: 640px) {
+  .bg3d-shape { display: none; }
+}
